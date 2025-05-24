@@ -1,62 +1,65 @@
-VIN9 = {
+local Bind = {
     Silent = {
         ["Enabled"] = false,
-
-        ["Prediction"] = 0.138,
-        ["Part"] = "HumanoidRootPart",
-        ["UseAirPart"] = false,
-        ["AirPart"] = "Head",
-        ["UseClosestPart"] = false,
-        
-        ["Hitchance"] = 100,
-
-        ["AntiGroundShots"] = false,
-        ["AntiGroundValue"] = 5,
-        ["AntiGroundActivation"] = -15,
-
-        ["Resolver"] = false,
-        ["ResolverTune"] = 0.13,
-
-        ["KoCheck"] = false,
-        ["GrabbedCheck"] = false,
-
-        ["SilentSwitch"] = false,
-        ["Keybind"] = "p",
-
-        FieldOfView = {
-            ["Visible"] = false,
-            ["Filled"] = false,
-            ["Color"] = Color3.fromRGB(255,255,255),
-            ["Transparency"] = 1,
-            ["Radius"] = 30,
+        ["Hit Part"] = "Head",
+        FOV = {
+            ["Enabled"] = false,
+            Size = {
+                X = 25
+            },
+            ["Weapons Configuration"] = {
+                ["Enabled"] = false,
+                Shotguns = {
+                    X = 15
+                },
+                Pistols = {
+                    X = 8
+                }
+            }
         },
+        Prediction = {
+            X = 0.131,
+            Y = 0.131,
+            Z = 0.131
+        },
+        ["Closest Point"] = {
+            ["Point Scale"] = 1.0
+        },
+        ["Client Bullet Redirection"] = {
+            ["Enabled"] = true,
+            Prediction = {
+                X = 0.131,
+                Y = 0.131,
+                Z = 0.131
+            },
+            Weapons = {
+                "M4A1",
+                "AK47"
+            }
+        }
     },
     Cam = {
         ["Enabled"] = false,
-        ["Prediction"] = 0.13,
+        ["XPrediction"] = 0.13,
+        ["YPrediction"] = 0.13,
         ["Part"] = "Head",
         ["Keybind"] = "c",
-
         ["UseShake"] = false,
         ["ShakeMultiplyer"] = 1,
         ["ShakeValue"] = 40,
-
         ["UseSmoothing"] = false,
         ["SmoothingAmount"] = 0.02,
         ["EasingStyle"] = Enum.EasingStyle.Linear,
         ["EasingDirection"] = Enum.EasingDirection.In,
-
         ["Resolver"] = false,
         ["ResolverTune"] = 0.13,
-
         ["UseCircleRadius"] = false,
         ["UnlockOnTargetDeath"] = false,
         ["UnlockOnOwnDeath"] = false,
-
         FieldOfView = {
             ["Visible"] = false,
             ["Filled"] = false,
-            ["Color"] = Color3.fromRGB(255,255,144),
+            ["Color"] = Color3.fromRGB(74, 253, 3),
             ["Transparency"] = 1,
             ["Radius"] = 30,
         },
@@ -64,434 +67,469 @@ VIN9 = {
     Both = {
         ["Notifications"] = false,
         ["Duration"] = 3,
-
         ["VisibleCheck"] = false,
         ["FriendCheck"] = false,
         ["CrewCheck"] = false,
         ["TeamCheck"] = false,
     },
-    Target = {
-        ["Enabled"] = ( false ),
-        ["Keybind"] = ( "c" ),
-        ["Prediction"] = ( 0.138 ),
-        ["Part"] = ( "HumanoidRootPart" ),
-
-        ["Spectate"] = false,
-        ["LookAt"] = false,
-
-        ["Resolver"] = false,
-        ["ResolverTune"] = 0.138,
-
-        ["TargetStrafe"] = false,
-        ["StrafeRadius"] = 10,
-        ["StrafeSpeed"] = 10,
-        ["StrafeHeight"] = 4,
-
-        ["Notify"] = false,
-
-        Drawings = {
-            ["Tracer"] = false,
-            ["Color"] = Color3.fromRGB(255,255,255),
-            ["Thickness"] = 1,
-            ["Transparency"] = 1,
-        },
+    Misc = {
+        ["WalkSpeedEnabled"] = false,
+        ["WalkSpeedKey"] = "v",
+        ["WalkSpeedValue"] = 40,
+        ["RapidFireEnabled"] = false,
+        ["FireRate"] = 0,
     },
 }
 
+-- hookfunction security
+local exe_name, exe_version = identifyexecutor()
+local function home999() end
+local function home888() end
 
-local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
-local Camera = game:GetService("Workspace").CurrentCamera
+if exe_name ~= "Wave Windows" then
+    hookfunction(home888, home999)
+    if isfunctionhooked(home888) == false then
+        game.Players.LocalPlayer:Destroy()
+        return LPH_CRASH()
+    end
+end 
 
-local hojixvChosenPlayer
-local angle = 0 
+local function check_env(env)
+    for _, func in env do
+        if type(func) ~= "function" then
+            continue
+        end
+
+        local functionhook = isfunctionhooked(func)
+
+        if functionhook then
+            game.Players.LocalPlayer:Destroy()
+            return LPH_CRASH()
+        end
+    end
+end
+
+check_env(getgenv())
+check_env(getrenv())
+
+local Lua_Fetch_Connections = getconnections
+local Lua_Fetch_Upvalues = getupvalues
+local Lua_Hook = hookfunction 
+local Lua_Hook_Method = hookmetamethod
+local Lua_Unhook = restorefunction
+local Lua_Replace_Function = replaceclosure
+local Lua_Set_Upvalue = setupvalue
+local Lua_Clone_Function = clonefunction
+
+local Game_RunService = game:GetService("RunService")
+local Game_LogService = game:GetService("LogService")
+local Game_LogService_MessageOut = Game_LogService.MessageOut
+
+local String_Lower = string.lower
+local Table_Find = table.find
+local Get_Type = type
+
+local Current_Connections = {};
+local Hooked_Connections = {};
+
+local function Test_Table(Table, Return_Type)
+    for TABLE_INDEX, TABLE_VALUE in Table do
+        if type(TABLE_VALUE) == String_Lower(Return_Type) then
+            return TABLE_VALUE, TABLE_INDEX
+        end
+        continue
+    end
+end
+
+local function Print_Table(Table)
+    table.foreach(Table, print)
+end
+
+if getgenv().DEBUG then
+    print("[auth.injected.live] Waiting...")
+end
+
+local good_check = 0
+
+function auth_heart()
+    return true, true
+end
+
+function Lua_Common_Intercept(old, ...)
+    print(...)
+    return old(...)
+end
+
+function XVNP_L(CONNECTION)
+    local s, e = pcall(function()
+        local OPENAC_TABLE = Lua_Fetch_Upvalues(CONNECTION.Function)[9]
+        local OPENAC_FUNCTION = OPENAC_TABLE[1]
+        local IGNORED_INDEX = {3, 12, 1, 11, 15, 8, 20, 18, 22}
+
+        Lua_Set_Upvalue(OPENAC_FUNCTION, 14, function(...)
+            return function(...)
+                local args = {...}
+                if type(args[1]) == "table" and args[1][1] then
+                    pcall(function()
+                        if type(args[1][1]) == "userdata" then
+                            args[1][1]:Disconnect()
+                            args[1][2]:Disconnect()
+                            args[1][3]:Disconnect()
+                            args[1][4]:Disconnect()
+                        end
+                    end)
+                end 
+            end
+        end)
+
+        Lua_Set_Upvalue(OPENAC_FUNCTION, 1, function(...)
+            task.wait(200)
+        end)
+
+        hookfunction(OPENAC_FUNCTION, function(...)
+            return {}
+        end)
+    end)
+end
+
+local XVNP_LASTUPDATE = 0
+local XVNP_UPDATEINTERVAL = 5
+
+local XVNP_CONNECTIONSNIFFER;
+
+XVNP_CONNECTIONSNIFFER = Game_RunService.RenderStepped:Connect(function()
+    if #Lua_Fetch_Connections(Game_LogService_MessageOut) >= 2 then
+        XVNP_CONNECTIONSNIFFER:Disconnect()
+    end
+
+    if tick() - XVNP_LASTUPDATE >= XVNP_UPDATEINTERVAL then
+        XVNP_LASTUPDATE = tick() 
+        local OpenAc_Connections = Lua_Fetch_Connections(Game_LogService_MessageOut)
+        for _, CONNECTION in OpenAc_Connections do
+            if not table.find(Current_Connections, CONNECTION) then
+                table.insert(Current_Connections, CONNECTION)
+                table.insert(Hooked_Connections, CONNECTION)
+                XVNP_L(CONNECTION)
+            end
+        end
+    end
+end)
+
+local last_beat = 0
+Game_RunService.RenderStepped:Connect(function()
+    if last_beat + 1 < tick() then
+        last_beat = tick() + 1 
+        local what, are = auth_heart()
+        if not are or not what then
+            if good_check <= 0 then
+                game.Players.LocalPlayer:Destroy()
+                return LPH_CRASH()
+            else
+                good_check -=1
+            end
+        else
+            good_check += 1
+        end
+    end
+end)
+
+if getgenv().DEBUG then
+    print("[auth.injected.live] Started Emulation Thread")
+end
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+local Camera = workspace.CurrentCamera
+local lastMousePos = Vector2.new(0, 0)
+local cachedTarget = nil
+
 local hojixvz
 local MrChosenOne
 local CamLocking
-local Tracer = Drawing.new("Line")
 local hojixv = Drawing.new("Circle")
 
-local cframespeedtoggle = false
-local speedvalue = 2
-
-hojixv.Color = VIN9.Silent.FieldOfView.Color
-hojixv.Thickness = 1
-hojixv.NumSides = 9e9
-hojixv.Radius = VIN9.Silent.FieldOfView.Radius*3
-hojixv.Transparency = VIN9.Silent.FieldOfView.Transparency
-hojixv.Visible = VIN9.Silent.FieldOfView.Visible
-hojixv.Filled = VIN9.Silent.FieldOfView.Filled
-
 local CamCircleFOV = Drawing.new("Circle")
-CamCircleFOV.Color = VIN9.Cam.FieldOfView.Color
+CamCircleFOV.Color = Bind.Cam.FieldOfView.Color
 CamCircleFOV.Thickness = 1
 CamCircleFOV.NumSides = 9e9
-CamCircleFOV.Radius = VIN9.Cam.FieldOfView.Radius*3
-CamCircleFOV.Transparency = VIN9.Cam.FieldOfView.Transparency
-CamCircleFOV.Visible = VIN9.Cam.FieldOfView.Visible
-CamCircleFOV.Filled = VIN9.Cam.FieldOfView.Filled
+CamCircleFOV.Radius = Bind.Cam.FieldOfView.Radius*3
+CamCircleFOV.Transparency = Bind.Cam.FieldOfView.Transparency
+CamCircleFOV.Visible = Bind.Cam.FieldOfView.Visible
+CamCircleFOV.Filled = Bind.Cam.FieldOfView.Filled
 
 game:GetService("RunService").heartbeat:Connect(function()
-    hojixv.Position = Vector2.new(Mouse.X,Mouse.Y+35)
-    CamCircleFOV.Position = Vector2.new(Mouse.X,Mouse.Y+35)
+    CamCircleFOV.Position = Vector2.new(Mouse.X, Mouse.Y+35)
     task.wait()
 end)
-
-
 
 local libary = loadstring(game:HttpGet("https://raw.githubusercontent.com/imagoodpersond/puppyware/main/lib"))()
 local NotifyLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/imagoodpersond/puppyware/main/notify"))()
 local Notify = NotifyLibrary.Notify
 makefolder("Example")
 
-local Window = libary:new({name = "Atomic", accent = Color3.fromRGB(175, 252, 149), textsize = 13})
-local Legit = Window:page({name = "Legit"})
+local Window = libary:new({name = "Atomic Ware | Beta", accent = Color3.fromRGB(74, 253, 3), textsize = 13})
+local Main = Window:page({name = "Legit"})
+local MiscTab = Window:page({name = "Rage"})
 
-local Silentaim = Legit:section({name = "Bullet Redirection", side = "left",size = 420})
-local Camlock = Legit:section({name = "Aim Assist", side = "Right",size = 445})
-local Both = Legit:section({name = "Both", side = "Left",size = 103})
+local Silentaim = Main:section({name = "Silent", side = "left", size = 320})
+local Camlock = Main:section({name = "Camlock", side = "right", size = 520})
+local ChecksSection = Main:section({name = "Checks", side = "left", size = 190})
 
-local Rage = Window:page({name = "Rage"})
-local TargetSection = Rage:section({name = "Target Aim", side = "left",size = 350})
-local StrafeSection = Rage:section({name = "Target Aim", side = "left",size = 150})
-local CFrameSection = Rage:section({name = "CFrame", side = "right",size = 80})
-local DrawingSection = Rage:section({name = "Drawings", side = "right",size = 130})
+local WalkSpeedSection = MiscTab:section({name = "WalkSpeed", side = "left", size = 120})
+local FeaturesSection = MiscTab:section({name = "Features", side = "right", size = 120})
 
-DrawingSection:toggle({name = "Tracer", def = false, callback = function(Boolean)
-    VIN9.Target.Drawings.Tracer = Boolean
+WalkSpeedSection:toggle({name = "Enabled", def = Bind.Misc.WalkSpeedEnabled, callback = function(Boolean)
+    Bind.Misc.WalkSpeedEnabled = Boolean
+    if Bind.Both.Notifications then
+        Notify(Boolean and "WalkSpeed Enabled" or "WalkSpeed Disabled")
+    end
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        if Bind.Misc.WalkSpeedEnabled then
+            LocalPlayer.Character.Humanoid.WalkSpeed = Bind.Misc.WalkSpeedValue
+        else
+            LocalPlayer.Character.Humanoid.WalkSpeed = 16
+        end
+    end
 end})
 
-DrawingSection:slider({name = "Thickness", def = 1, max = 10, min = 1, rounding = false, callback = function(Value)
-    VIN9.Target.Drawings.Thickness = Value
+WalkSpeedSection:textbox({name = "Key", def = Bind.Misc.WalkSpeedKey, callback = function(Value)
+    Bind.Misc.WalkSpeedKey = Value:sub(1, 1):lower()
 end})
 
-DrawingSection:slider({name = "Transparency", def = 1, max = 1, min = 0.1, rounding = false, callback = function(Value)
-    VIN9.Target.Drawings.Transparency = Value
+WalkSpeedSection:slider({name = "Speed", def = Bind.Misc.WalkSpeedValue, max = 1000, min = 16, rounding = false, callback = function(Value)
+    Bind.Misc.WalkSpeedValue = Value
+    if Bind.Misc.WalkSpeedEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.WalkSpeed = Value
+        if Bind.Both.Notifications then
+            Notify("WalkSpeed Set to: " .. Value)
+        end
+    end
 end})
 
-CFrameSection:toggle({name = "Enabled", def = false, callback = function(Boolean)
-    cframespeedtoggle = Boolean
+local function applySpeed()
+    if Bind.Misc.WalkSpeedEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.WalkSpeed = Bind.Misc.WalkSpeedValue
+    end
+end
+
+LocalPlayer.CharacterAdded:Connect(function(char)
+    char:WaitForChild("Humanoid", 5)
+    wait(0.1)
+    applySpeed()
+end)
+
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    if input.KeyCode == Enum.KeyCode[Bind.Misc.WalkSpeedKey:upper()] then
+        Bind.Misc.WalkSpeedEnabled = not Bind.Misc.WalkSpeedEnabled
+        if Bind.Misc.WalkSpeedEnabled then
+            applySpeed()
+            if Bind.Both.Notifications then
+                Notify("WalkSpeed Enabled: " .. Bind.Misc.WalkSpeedValue)
+            end
+        else
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                LocalPlayer.Character.Humanoid.WalkSpeed = 16
+                if Bind.Both.Notifications then
+                    Notify("WalkSpeed Disabled")
+                end
+            end
+        end
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if Bind.Misc.WalkSpeedEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        if LocalPlayer.Character.Humanoid.WalkSpeed ~= Bind.Misc.WalkSpeedValue then
+            LocalPlayer.Character.Humanoid.WalkSpeed = Bind.Misc.WalkSpeedValue
+        end
+    end
+end)
+
+local player = game.Players.LocalPlayer
+local uis = game:GetService("UserInputService")
+local holding = false
+local tool = nil
+
+local function findTool()
+    tool = player.Character and player.Character:FindFirstChildOfClass("Tool")
+end
+
+local function rapidFire()
+    while holding and Bind.Misc.RapidFireEnabled do
+        if tool then
+            tool:Activate()
+        end
+        wait(Bind.Misc.FireRate)
+    end
+end
+
+uis.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 and Bind.Misc.RapidFireEnabled then
+        findTool()
+        if tool then
+            holding = true
+            rapidFire()
+        end
+    end
+end)
+
+uis.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        holding = false
+    end
+end)
+
+FeaturesSection:toggle({name = "Rapid Fire", def = Bind.Misc.RapidFireEnabled, callback = function(Boolean)
+    Bind.Misc.RapidFireEnabled = Boolean
+    if Bind.Both.Notifications then
+        Notify(Boolean and "Rapid Fire Enabled" or "Rapid Fire Disabled")
+    end
 end})
 
-CFrameSection:slider({name = "Speed", def = 2, max = 10, min = 1, rounding = false, callback = function(Value)
-    speedvalue = Value
+FeaturesSection:slider({name = "Fire Rate", def = Bind.Misc.FireRate, max = 10, min = 0, rounding = false, callback = function(Value)
+    Bind.Misc.FireRate = Value
 end})
 
-TargetSection:toggle({name = "Enabled", def = false, callback = function(Boolean)
-    VIN9.Target.Enabled = Boolean
+Silentaim:toggle({name = "Enabled", def = Bind.Silent.Enabled, callback = function(Boolean)
+    Bind.Silent.Enabled = Boolean
 end})
 
-TargetSection:dropdown({name = "Key", def = "c", max = 7, options = {"c", "q", "x", "z","t", "v", "g", "y"}, callback = function(part)
-    VIN9.Target.Keybind = part
-end})
-
-TargetSection:dropdown({name = "Part", def = "HumanoidRootPart", max = 7, options = {"Head", "HumanoidRootPart", "UpperTorso", "LowerTorso","LeftHand", "RightHand", "LeftFoot", "RightFoot"}, callback = function(part)
-    VIN9.Target.Part = part
-end})
-
-TargetSection:toggle({name = "Spectate", def = false, callback = function(Boolean)
-    VIN9.Target.Spectate = Boolean
-end})
-
-TargetSection:toggle({name = "Look At", def = false, callback = function(Boolean)
-    VIN9.Target.LookAt = Boolean
-end})
-
-TargetSection:toggle({name = "Resolver", def = false, callback = function(Boolean)
-    VIN9.Target.Resolver = Boolean
-end})
-
-TargetSection:toggle({name = "Notifications", def = false, callback = function(Boolean)
-    VIN9.Target.Notify = Boolean
-end})
-
-TargetSection:slider({name = "Prediction", def = 0.3, max = 0.4, min = 0.01, rounding = false, callback = function(Value)
-    VIN9.Target.Prediction = Value
-end})
-
-TargetSection:slider({name = "Resolver Tune", def = 0.3, max = 0.4, min = 0.01, rounding = false, callback = function(Value)
-    VIN9.Target.ResolverTune = Value
-end})
-
-StrafeSection:toggle({name = "Target Strafe", def = false, callback = function(Boolean)
-    VIN9.Target.TargetStrafe = Boolean
-end})
-
-StrafeSection:slider({name = "Radius", def = 5, max = 20, min = 1, rounding = false, callback = function(Value)
-    VIN9.Target.StrafeRadius = Value
-end})
-
-StrafeSection:slider({name = "Speed", def = 10, max = 100, min = 1, rounding = false, callback = function(Value)
-    VIN9.Target.StrafeSpeed = Value
-end})
-
-StrafeSection:slider({name = "Height", def = 0, max = 20, min = 0, rounding = false, callback = function(Value)
-    VIN9.Target.StrafeHeight = Value
-end})
-
-
-
-
-Silentaim:toggle({name = "Enabled", def = false, callback = function(Boolean)
-    VIN9.Silent.Enabled = Boolean
-end})
-
-Silentaim:toggle({name = "Show FOV", def = false, callback = function(Boolean)
+Silentaim:toggle({name = "Show FOV", def = Bind.Silent.FOV.Enabled, callback = function(Boolean)
+    Bind.Silent.FOV.Enabled = Boolean
     hojixv.Visible = Boolean
 end})
 
-Silentaim:toggle({name = "Resolver", def = false, callback = function(Boolean)
-    VIN9.Silent.Resolver = Boolean
+Silentaim:dropdown({name = "Hit Part", def = Bind.Silent["Hit Part"], max = 2, options = {"Head", "Closest Point"}, callback = function(part)
+    Bind.Silent["Hit Part"] = part
 end})
 
-Silentaim:toggle({name = "Use Closest Part", def = false, callback = function(Boolean)
-    VIN9.Silent.UseClosestPart = Boolean
+Silentaim:slider({name = "FOV Radius", def = Bind.Silent.FOV.Size.X, max = 250, min = 1, rounding = true, callback = function(Value)
+    Bind.Silent.FOV.Size.X = Value
+    hojixv.Radius = Value * 5
 end})
 
-Silentaim:toggle({name = "Anti Ground Shots", def = false, callback = function(Boolean)
-    VIN9.Silent.AntiGroundShots = Boolean
+Silentaim:slider({name = "Point Scale", def = Bind.Silent["Closest Point"]["Point Scale"], max = 2.0, min = 0.1, rounding = false, callback = function(Value)
+    Bind.Silent["Closest Point"]["Point Scale"] = Value
 end})
 
-
-Silentaim:toggle({name = "Use Air Part", def = false, callback = function(Boolean)
-    VIN9.Silent.UseAirPart = Boolean
+Silentaim:textbox({name = "Prediction X", def = tostring(Bind.Silent.Prediction.X), callback = function(Value)
+    Bind.Silent.Prediction.X = tonumber(Value) or 0.131
 end})
 
-Silentaim:toggle({name = "KO Check", def = false, callback = function(Boolean)
-    VIN9.Silent.KoCheck = Boolean
+Silentaim:textbox({name = "Prediction Y", def = tostring(Bind.Silent.Prediction.Y), callback = function(Value)
+    Bind.Silent.Prediction.Y = tonumber(Value) or 0.131
 end})
 
-Silentaim:toggle({name = "Grabbed Check", def = false, callback = function(Boolean)
-    VIN9.Silent.GrabbedCheck = Boolean
+Silentaim:textbox({name = "Prediction Z", def = tostring(Bind.Silent.Prediction.Z), callback = function(Value)
+    Bind.Silent.Prediction.Z = tonumber(Value) or 0.131
 end})
 
-Silentaim:slider({name = "Prediction", def = 0.3, max = 0.4, min = 0.01, rounding = false, callback = function(Value)
-    VIN9.Silent.Prediction = Value
+Silentaim:colorpicker({name = "FOV Color", def = Bind.Silent.FOV.Color or Color3.fromRGB(74, 253, 3), callback = function(Color)
+    Bind.Silent.FOV.Color = Color
+    hojixv.Color = Color
 end})
 
-Silentaim:slider({name = "Radius", def = 20, max = 250, min = 1, rounding = true, callback = function(Value)
-    hojixv.Radius = Value*3
+Camlock:toggle({name = "Enabled", def = Bind.Cam.Enabled, callback = function(Boolean)
+    Bind.Cam.Enabled = Boolean
 end})
 
-Silentaim:slider({name = "HitChance", def = 100, max = 100, min = 1, rounding = true, callback = function(Value)
-    VIN9.Silent.Hitchance = Value
+Camlock:toggle({name = "Smooth", def = Bind.Cam.UseSmoothing, callback = function(Boolean)
+    Bind.Cam.UseSmoothing = Boolean
 end})
 
-
-Silentaim:slider({name = "AntiGround Shots Value", def = 5, max = 10, min = 1, rounding = true, callback = function(Value)
-    VIN9.Silent.AntiGroundValue = Value
+Camlock:toggle({name = "Shake", def = Bind.Cam.UseShake, callback = function(Boolean)
+    Bind.Cam.UseShake = Boolean
 end})
 
-Silentaim:slider({name = "Resolver Tuning", def = 0.3, max = 0.2, min = 0.1, rounding = false, callback = function(Value)
-    VIN9.Silent.ResolverTune = Value
-end})
-
-Silentaim:dropdown({name = "Part", def = "HumanoidRootPart", max = 7, options = {"Head", "HumanoidRootPart", "UpperTorso", "LowerTorso","LeftHand", "RightHand", "LeftFoot", "RightFoot"}, callback = function(part)
-    VIN9.Silent.Part = part
-end})
-
-Silentaim:dropdown({name = "Air Part", def = "Head", max = 7, options = {"Head", "HumanoidRootPart", "UpperTorso", "LowerTorso","LeftHand", "RightHand", "LeftFoot", "RightFoot"}, callback = function(part)
-    VIN9.Silent.AirPart = part
-end})
-
-Camlock:toggle({name = "Enabled", def = false, callback = function(Boolean)
-    VIN9.Cam.Enabled = Boolean
-end})
-
-
-
-Camlock:toggle({name = "Smoothing", def = false, callback = function(Boolean)
-    VIN9.Cam.UseSmoothing = Boolean
-end})
-
-Camlock:toggle({name = "Add Shake", def = false, callback = function(Boolean)
-    VIN9.Cam.UseShake = Boolean
-end})
-
-Camlock:toggle({name = "Show FOV", def = false, callback = function(Boolean)
+Camlock:toggle({name = "Show FOV", def = Bind.Cam.FieldOfView.Visible, callback = function(Boolean)
+    Bind.Cam.FieldOfView.Visible = Boolean
     CamCircleFOV.Visible = Boolean
 end})
 
-Camlock:toggle({name = "Use Circle Radius", def = false, callback = function(Boolean)
-    VIN9.Cam.UseCircleRadius = Boolean
+Camlock:toggle({name = "Use Radius", def = Bind.Cam.UseCircleRadius, callback = function(Boolean)
+    Bind.Cam.UseCircleRadius = Boolean
 end})
 
-Camlock:toggle({name = "Resolver", def = false, callback = function(Boolean)
-    VIN9.Cam.Resolver = Boolean
+Camlock:toggle({name = "Resolver", def = Bind.Cam.Resolver, callback = function(Boolean)
+    Bind.Cam.Resolver = Boolean
 end})
 
-Camlock:toggle({name = "Unlock On Target Death", def = false, callback = function(Boolean)
-    VIN9.Cam.UnlockOnTargetDeath = Boolean
+Camlock:toggle({name = "Unlock Target", def = Bind.Cam.UnlockOnTargetDeath, callback = function(Boolean)
+    Bind.Cam.UnlockOnTargetDeath = Boolean
 end})
 
-Camlock:toggle({name = "Unlock On My Death", def = false, callback = function(Boolean)
-    VIN9.Cam.UnlockOnOwnDeath = Boolean
+Camlock:toggle({name = "Unlock Own", def = Bind.Cam.UnlockOnOwnDeath, callback = function(Boolean)
+    Bind.Cam.UnlockOnOwnDeath = Boolean
 end})
 
-Camlock:slider({name = "Prediction", def = 0.3, max = 0.4, min = 0.01, rounding = false, callback = function(Value)
-    VIN9.Cam.Prediction = Value
+Camlock:textbox({name = "X Pred", def = tostring(Bind.Cam.XPrediction), callback = function(Value)
+    Bind.Cam.XPrediction = tonumber(Value) or 0.13
 end})
 
-Camlock:slider({name = "Smoothing Amount", def = 0.02, max = 1, min = 0.001, rounding = false, callback = function(Value)
-    VIN9.Cam.SmoothingAmount = Value
+Camlock:textbox({name = "Y Pred", def = tostring(Bind.Cam.YPrediction), callback = function(Value)
+    Bind.Cam.YPrediction = tonumber(Value) or 0.13
 end})
 
-Camlock:slider({name = "Shake Value", def = 40, max = 100, min = 1, rounding = false, callback = function(Value)
-    VIN9.Cam.ShakeValue = Value
+Camlock:slider({name = "Smooth Amount", def = Bind.Cam.SmoothingAmount, max = 1, min = 0.001, rounding = false, callback = function(Value)
+    Bind.Cam.SmoothingAmount = Value
 end})
 
-Camlock:slider({name = "Shake Multiplyer", def = 1, max = 10, min = 1, rounding = false, callback = function(Value)
-    VIN9.Cam.ShakeMultiplyer = Value
+Camlock:slider({name = "Shake Value", def = Bind.Cam.ShakeValue, max = 100, min = 1, rounding = false, callback = function(Value)
+    Bind.Cam.ShakeValue = Value
 end})
 
-Camlock:slider({name = "Resolver Tune", def = 0.13, max = 0.2, min = 0.1, rounding = false, callback = function(Value)
-    VIN9.Cam.ResolverTune = Value
+Camlock:slider({name = "Shake Multiplier", def = Bind.Cam.ShakeMultiplyer, max = 10, min = 1, rounding = false, callback = function(Value)
+    Bind.Cam.ShakeMultiplyer = Value
 end})
 
-Camlock:slider({name = "Radius", def = 20, max = 250, min = 1, rounding = false, callback = function(Value)
+Camlock:slider({name = "Resolver Tune", def = Bind.Cam.ResolverTune, max = 0.2, min = 0.1, rounding = false, callback = function(Value)
+    Bind.Cam.ResolverTune = Value
+end})
+
+Camlock:slider({name = "Radius", def = Bind.Cam.FieldOfView.Radius, max = 250, min = 1, rounding = false, callback = function(Value)
+    Bind.Cam.FieldOfView.Radius = Value
     CamCircleFOV.Radius = Value*3
 end})
 
-Camlock:dropdown({name = "Part", def = "Head", max = 7, options = {"Head", "HumanoidRootPart", "UpperTorso", "LowerTorso","LeftHand", "RightHand", "LeftFoot", "RightFoot"}, callback = function(part)
-    VIN9.Cam.Part = part
+Camlock:dropdown({name = "Part", def = Bind.Cam.Part, max = 4, options = {"Head", "HumanoidRootPart", "UpperTorso", "LowerTorso"}, callback = function(part)
+    Bind.Cam.Part = part
 end})
 
-Camlock:dropdown({name = "Key", def = "c", max = 7, options = {"c", "q", "x", "z","t", "v", "g", "y"}, callback = function(part)
-    VIN9.Cam.Keybind = part
+Camlock:textbox({name = "Key", def = Bind.Cam.Keybind, callback = function(Value)
+    Bind.Cam.Keybind = Value:sub(1, 1):lower()
 end})
 
-
-
-Both:toggle({name = "Visible Check", def = false, callback = function(Boolean)
-    VIN9.Both.VisibleCheck = Boolean
+Camlock:colorpicker({name = "FOV Color", def = Bind.Cam.FieldOfView.Color, callback = function(Color)
+    Bind.Cam.FieldOfView.Color = Color
+    CamCircleFOV.Color = Color
 end})
 
-Both:toggle({name = "Friend Check", def = false, callback = function(Boolean)
-    VIN9.Both.FriendCheck = Boolean
+ChecksSection:toggle({name = "Visible", def = Bind.Both.VisibleCheck, callback = function(Boolean)
+    Bind.Both.VisibleCheck = Boolean
 end})
 
-Both:toggle({name = "Crew Check", def = false, callback = function(Boolean)
-    VIN9.Both.CrewCheck = Boolean
+ChecksSection:toggle({name = "Friend", def = Bind.Both.FriendCheck, callback = function(Boolean)
+    Bind.Both.FriendCheck = Boolean
 end})
 
-Both:toggle({name = "Team Check", def = false, callback = function(Boolean)
-    VIN9.Both.TeamCheck = Boolean
+ChecksSection:toggle({name = "Crew", def = Bind.Both.CrewCheck, callback = function(Boolean)
+    Bind.Both.CrewCheck = Boolean
 end})
 
-
-
-local Settings = Window:page({name = "Settings"})
-local ConfigSection = Settings:section({name = "Config",side = "right", size = 250})
-local ConfigLoader = ConfigSection:configloader({folder = "Example"})
-
-
-
-
-
+ChecksSection:toggle({name = "Team", def = Bind.Both.TeamCheck, callback = function(Boolean)
+    Bind.Both.TeamCheck = Boolean
+end})
 
 function Notify(Text)
     game.StarterGui:SetCore("SendNotification", {
-        Title = "VIN9",
+        Title = "Bind",
         Text = Text,
-        Duration = VIN9.Both.Duration,
+        Duration = Bind.Both.Duration,
     })
-end
-
-local ChanceOfHitting = function(Number)
-    Number = math.floor(Number)
-    local Chance = math.floor(Random.new().NextNumber(Random.new(), 0, 1) * 100) / 100
-    return Chance <= Number / 100
-end
-
-local function ClosestPartToCursor(Target)
-    local closestPart
-    local shortestDistance = 9e9
-
-    for _, v in next, Target:GetChildren() do
-        if v:IsA("Part") or v:IsA("MeshPart") then
-                local WorldToViewP = game:GetService("Workspace").CurrentCamera:WorldToScreenPoint(v.Position)
-                local Distance = (Vector2.new(WorldToViewP.X, WorldToViewP.Y) -
-                                    Vector2.new(Mouse.X, Mouse.Y)).Magnitude
-            if Distance < shortestDistance then
-                shortestDistance = Distance
-                closestPart = v
-            end
-        end
-    end
-    return closestPart
-end
-
-local function hojiownsu()
-    local target = nil
-    local distance = 9e9
-    local players = game:GetService("Players"):GetPlayers()
-    local localPlayer = game:GetService("Players").LocalPlayer
-    local camera = game:GetService("Workspace").CurrentCamera
-    local Probability = ChanceOfHitting(VIN9.Silent.Hitchance)
-
-    if (not Probability) then
-            return nil
-        end
-    
-    for _, player in pairs(players) do
-        if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") then
-            local castingFrom = CFrame.new(camera.CFrame.Position, player.Character[VIN9.Silent.Part].CFrame.Position) * CFrame.new(0, 0, -4)
-            local ray = Ray.new(castingFrom.Position, castingFrom.LookVector * 9000)
-            local hitPart, hitPosition = game:GetService("Workspace"):FindPartOnRayWithIgnoreList(ray, {localPlayer.Character:FindFirstChild("Head")})
-            local rootDistance = (player.Character[VIN9.Silent.Part].Position - hitPosition).magnitude
-            
-            if rootDistance < 4 then
-                local rootPosition, visible = camera:WorldToViewportPoint(player.Character[VIN9.Silent.Part].Position)
-                if visible then
-                    local realDistance = (Vector2.new(Mouse.X, Mouse.Y) - Vector2.new(rootPosition.X, rootPosition.Y)).Magnitude
-                    if realDistance < distance and realDistance < hojixv.Radius then
-                        distance = realDistance
-                        target = player.Character
-                    end
-                end
-
-                if VIN9.Silent.KoCheck and player then
-                    local KoCheck = player.Character.BodyEffects["K.O"].Value
-                    if KoCheck then
-                        distance = nil
-                        target = nil
-                    end
-                end
-                if VIN9.Silent.GrabbedCheck and player then
-                    local Grabbed = player.Character:FindFirstChild("GRABBING_CONSTRAINT") ~= nil
-                    if Grabbed then
-                        distance = nil
-                        target = nil
-                    end
-                end
-                if VIN9.Both.VisibleCheck and player then
-                    if player.Character.Head.Transparency > 0.5 then
-                        distance = nil
-                        target = nil
-                    end
-                end
-                if VIN9.Both.CrewCheck and player then
-                    if player.DataFolder.Information:FindFirstChild("Crew").Value == game.Players.LocalPlayer.DataFolder.Information:FindFirstChild("Crew").Value then
-                        distance = nil
-                        target = nil
-                    end
-                end
-                if VIN9.Both.FriendCheck and player then
-                    if game.Players.LocalPlayer:IsFriendsWith(player.UserId) then
-                        distance = nil
-                        target = nil
-                    end
-                end
-                if VIN9.Both.TeamCheck and player then
-                    if player.Team == game.Players.LocalPlayer.Team then
-                        distance = nil
-                        target = nil
-                    end
-                end
-            end
-        end
-
-    end
-    return target
 end
 
 function ClosestPlayer()
@@ -502,8 +540,8 @@ function ClosestPlayer()
             local otherPlayerPosition = otherPlayer.Character.HumanoidRootPart.Position
             local pos = game:GetService("Workspace").CurrentCamera:WorldToViewportPoint(otherPlayerPosition)
             local distance = (Vector2.new(pos.X, pos.Y) - Vector2.new(game.Players.LocalPlayer:GetMouse().X, game.Players.LocalPlayer:GetMouse().Y)).Magnitude
-            if distance < shortestDistance  then
-                if VIN9.Cam.UseCircleRadius and distance < CamCircleFOV.Radius then
+            if distance < shortestDistance then
+                if Bind.Cam.UseCircleRadius and distance < CamCircleFOV.Radius then
                     NearestPlayer = otherPlayer
                     shortestDistance = distance
                 else
@@ -516,32 +554,204 @@ function ClosestPlayer()
     return NearestPlayer
 end
 
-CamKeybind = false
-TargetKeybind = false
-    Mouse.KeyDown:Connect(function(ChosenKey)
-        if ChosenKey == VIN9.Cam.Keybind and VIN9.Cam.Enabled then
-                if CamKeybind == false then
-                    CamKeybind = true
-                    MrChosenOne = ClosestPlayer()
-                    if VIN9.Both.Notifications then
-                        Notify("Locked Onto "..MrChosenOne.DisplayName)
-                    end
-                elseif CamKeybind == true then
-                    CamKeybind = false
-                    if VIN9.Both.Notifications then
-                        Notify("No Longer Locked On")
+local function getClosestPart(player)
+    local bestPart, bestDist = nil, math.huge
+    local pointScale = Bind.Silent["Closest Point"]["Point Scale"] or 1.0
+    if player.Character then
+        for _, part in pairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
+                if onScreen then
+                    local partPos = Vector2.new(screenPos.X, screenPos.Y)
+                    local dist = (lastMousePos - partPos).Magnitude * pointScale
+                    if dist < bestDist then
+                        bestPart, bestDist = part, dist
                     end
                 end
-    
+            end
         end
-    end)
+    end
+    return bestPart
+end
 
+hojixv.Color = Bind.Silent.FOV.Color or Color3.fromRGB(74, 253, 3)
+hojixv.Thickness = 1
+hojixv.NumSides = 100
+hojixv.Radius = Bind.Silent.FOV.Size.X * 5
+hojixv.Transparency = 1
+hojixv.Visible = Bind.Silent.FOV.Enabled
+hojixv.Filled = false
 
-task.spawn(function()
-    while true do
-    task.wait()
-        if VIN9.Silent.UseClosestPart and VIN9.Silent.Enabled and hojixvz and hojixvz[VIN9.Silent.Part] then
-            VIN9.Silent.Part = tostring(ClosestPartToCursor(hojixvz))
+local function updateFOV()
+    local mouse = game.Players.LocalPlayer:GetMouse()
+    local mousePos = Vector2.new(mouse.X, mouse.Y + 36)
+    lastMousePos = mousePos
+
+    local fovConfig = Bind.Silent.FOV
+    local currentTool = nil
+
+    if LocalPlayer.Character then
+        currentTool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
+    end
+
+    local radius = fovConfig.Size.X * 5
+    if fovConfig["Weapons Configuration"] and fovConfig["Weapons Configuration"].Enabled and currentTool then
+        local weaponName = string.lower(currentTool.Name or "")
+        if string.find(weaponName, "shotgun") then
+            radius = fovConfig["Weapons Configuration"].Shotguns.X * 5
+        elseif string.find(weaponName, "pistol") then
+            radius = fovConfig["Weapons Configuration"].Pistols.X * 5
+        end
+    end
+
+    hojixv.Radius = radius
+    hojixv.Position = mousePos
+    hojixv.Visible = Bind.Silent.FOV.Enabled
+    hojixv.Filled = false
+    hojixv.Color = Bind.Silent.FOV.Color or Color3.fromRGB(74, 253, 3)
+
+    local bestPart, bestDist = nil, math.huge
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local part = nil
+            if Bind.Silent["Hit Part"] == "Closest Point" then
+                part = getClosestPart(player)
+            else
+                part = player.Character:FindFirstChild("Head")
+            end
+            if part then
+                local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
+                if onScreen then
+                    local partPos = Vector2.new(screenPos.X, screenPos.Y)
+                    local dist = (mousePos - partPos).Magnitude
+                    if dist < bestDist and dist <= radius then
+                        local validTarget = true
+                        if Bind.Both.VisibleCheck then
+                            if player.Character.Head.Transparency > 0.5 then
+                                validTarget = false
+                            end
+                        end
+                        if Bind.Both.CrewCheck then
+                            if player.DataFolder and player.DataFolder.Information:FindFirstChild("Crew") and LocalPlayer.DataFolder and LocalPlayer.DataFolder.Information:FindFirstChild("Crew") then
+                                if player.DataFolder.Information.Crew.Value == LocalPlayer.DataFolder.Information.Crew.Value then
+                                    validTarget = false
+                                end
+                            end
+                        end
+                        if Bind.Both.FriendCheck then
+                            if LocalPlayer:IsFriendsWith(player.UserId) then
+                                validTarget = false
+                            end
+                        end
+                        if Bind.Both.TeamCheck then
+                            if player.Team == LocalPlayer.Team then
+                                validTarget = false
+                            end
+                        end
+                        if validTarget then
+                            bestPart, bestDist = part, dist
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    cachedTarget = bestPart
+end
+
+RunService.RenderStepped:Connect(updateFOV)
+
+local function applyPrediction(cf, offset)
+    return cf * CFrame.new(offset.X, offset.Y, offset.Z)
+end
+
+local function isTargetValid(target)
+    if not target or not target.Parent or not target.Parent.Parent then return false end
+    local player = Players:GetPlayerFromCharacter(target.Parent)
+    if not player then return false end
+
+    local valid = true
+    if Bind.Both.VisibleCheck then
+        if target.Parent.Head.Transparency > 0.5 then
+            valid = false
+        end
+    end
+    if Bind.Both.CrewCheck then
+        if player.DataFolder and player.DataFolder.Information:FindFirstChild("Crew") and LocalPlayer.DataFolder and LocalPlayer.DataFolder.Information:FindFirstChild("Crew") then
+            if player.DataFolder.Information.Crew.Value == LocalPlayer.DataFolder.Information.Crew.Value then
+                valid = false
+            end
+        end
+    end
+    if Bind.Both.FriendCheck then
+        if LocalPlayer:IsFriendsWith(player.UserId) then
+            valid = false
+        end
+    end
+    if Bind.Both.TeamCheck then
+        if player.Team == LocalPlayer.Team then
+            valid = false
+        end
+    end
+    return valid
+end
+
+local mt = getrawmetatable(game)
+setreadonly(mt, false)
+local oldIndex = mt.__index
+mt.__index = newcclosure(function(obj, prop)
+    if obj:IsA("Mouse") and (prop == "Hit" or prop == "Target") and Bind.Silent.Enabled then
+        local target = cachedTarget
+        if target and isTargetValid(target) then
+            local prediction = Bind.Silent.Prediction
+            local redir = Bind.Silent["Client Bullet Redirection"]
+            local currentTool = (LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool")) or nil
+            if redir.Enabled and currentTool then
+                local toolName = tostring(currentTool.Name)
+                for _, weapon in ipairs(redir.Weapons) do
+                    if string.find(string.lower(toolName), string.lower(weapon)) then
+                        prediction = redir.Prediction
+                        break
+                    end
+                end
+            end
+            local predMultiplier = Vector3.new(prediction.X, prediction.Y, prediction.Z)
+            local offset = target.Velocity * predMultiplier
+            if prop == "Hit" then
+                return applyPrediction(target.CFrame, offset)
+            else
+                return target
+            end
+        end
+    end
+    return oldIndex(obj, prop)
+end)
+
+RunService.Heartbeat:Connect(function()
+    if not Bind.Silent.Enabled then return end
+    local target = cachedTarget
+    local currentTool = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool")
+    if target and currentTool and currentTool:FindFirstChild("Activate") and isTargetValid(target) then
+        currentTool:Activate()
+    end
+end)
+
+CamKeybind = false
+
+Mouse.KeyDown:Connect(function(ChosenKey)
+    if ChosenKey == Bind.Cam.Keybind and Bind.Cam.Enabled then
+        if CamKeybind == false then
+            CamKeybind = true
+            MrChosenOne = ClosestPlayer()
+            if Bind.Both.Notifications then
+                Notify("Locked Onto "..MrChosenOne.DisplayName)
+            end
+        elseif CamKeybind == true then
+            CamKeybind = false
+            if Bind.Both.Notifications then
+                Notify("No Longer Locked On")
+            end
         end
     end
 end)
@@ -551,72 +761,71 @@ task.spawn(function()
         task.wait()
         if CamKeybind then
             if CamKeybind and MrChosenOne and MrChosenOne.Parent then
-            local Opp = MrChosenOne.Character[VIN9.Cam.Part].Position + MrChosenOne.Character[VIN9.Cam.Part].Velocity * VIN9.Cam.Prediction
-            local Mop = MrChosenOne.Character.Humanoid.MoveDirection
-            
-            if VIN9.Cam.Resolver and CamKeybind and MrChosenOne then
-                Mop = Mop * 16
-                Opp = MrChosenOne.Character[VIN9.Cam.Part].Position + Mop * VIN9.Cam.ResolverTune
-            end
-                if VIN9.Cam.UseSmoothing == true then
-                    Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.p, Opp) 
-                        , VIN9.Cam.SmoothingAmount , VIN9.Cam.EasingStyle, VIN9.Cam.EasingDirection)
-                    if VIN9.Cam.UseShake then
-                        Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.p, Opp + Vector3.new(math.random(-VIN9.Cam.ShakeValue,VIN9.Cam.ShakeValue),math.random(-VIN9.Cam.ShakeValue,VIN9.Cam.ShakeValue),math.random(-VIN9.Cam.ShakeValue,VIN9.Cam.ShakeValue)) * VIN9.Cam.ShakeMultiplyer ) 
-                        , VIN9.Cam.SmoothingAmount , VIN9.Cam.EasingStyle, VIN9.Cam.EasingDirection)
+                local Opp = MrChosenOne.Character[Bind.Cam.Part].Position + Vector3.new(
+                    MrChosenOne.Character[Bind.Cam.Part].Velocity.X * Bind.Cam.XPrediction,
+                    MrChosenOne.Character[Bind.Cam.Part].Velocity.Y * Bind.Cam.YPrediction,
+                    0
+                )
+                local Mop = MrChosenOne.Character.Humanoid.MoveDirection
+                if Bind.Cam.Resolver and CamKeybind and MrChosenOne then
+                    Mop = Mop * 16
+                    Opp = MrChosenOne.Character[Bind.Cam.Part].Position + Mop * Bind.Cam.ResolverTune
+                end
+                if Bind.Cam.UseSmoothing == true then
+                    Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.p, Opp), Bind.Cam.SmoothingAmount, Bind.Cam.EasingStyle, Bind.Cam.EasingDirection)
+                    if Bind.Cam.UseShake then
+                        Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.p, Opp + Vector3.new(math.random(-Bind.Cam.ShakeValue,Bind.Cam.ShakeValue),math.random(-Bind.Cam.ShakeValue,Bind.Cam.ShakeValue),math.random(-Bind.Cam.ShakeValue,Bind.Cam.ShakeValue)) * Bind.Cam.ShakeMultiplyer), Bind.Cam.SmoothingAmount, Bind.Cam.EasingStyle, Bind.Cam.EasingDirection)
                     end
                 else
                     Camera.CFrame = CFrame.new(Camera.CFrame.p, Opp)
-
-                    if VIN9.Cam.UseShake then
-                        Camera.CFrame = CFrame.new(Camera.CFrame.p, Opp + Vector3.new(math.random(-VIN9.Cam.ShakeValue,VIN9.Cam.ShakeValue),math.random(-VIN9.Cam.ShakeValue,VIN9.Cam.ShakeValue),math.random(-VIN9.Cam.ShakeValue,VIN9.Cam.ShakeValue)) * VIN9.Cam.ShakeMultiplyer )
+                    if Bind.Cam.UseShake then
+                        Camera.CFrame = CFrame.new(Camera.CFrame.p, Opp + Vector3.new(math.random(-Bind.Cam.ShakeValue,Bind.Cam.ShakeValue),math.random(-Bind.Cam.ShakeValue,Bind.Cam.ShakeValue),math.random(-Bind.Cam.ShakeValue,Bind.Cam.ShakeValue)) * Bind.Cam.ShakeMultiplyer)
                     end
                 end
-
-                if VIN9.Cam.UnlockOnTargetDeath then
+                if Bind.Cam.UnlockOnTargetDeath then
                     if MrChosenOne.Character.BodyEffects["K.O"].Value then
                         CamKeybind = false
-                        if VIN9.Both.Notifications then
+                        if Bind.Both.Notifications then
                             Notify("No Longer Attached")
                         end
                     end
                 end 
-                if VIN9.Cam.UnlockOnOwnDeath then
+                if Bind.Cam.UnlockOnOwnDeath then
                     if game.Players.LocalPlayer.Character.BodyEffects["K.O"].Value then
                         CamKeybind = false
-                        if VIN9.Both.Notifications then
+                        if Bind.Both.Notifications then
                             Notify("No Longer Attached")
                         end
                     end
                 end 
-                if VIN9.Both.VisibleCheck then
+                if Bind.Both.VisibleCheck then
                     if MrChosenOne.Character.Head.Transparency > 0.5 then
                         CamKeybind = false
-                        if VIN9.Both.Notifications then
+                        if Bind.Both.Notifications then
                             Notify("No Longer Attached")
                         end
                     end
                 end
-                if VIN9.Both.CrewCheck then
+                if Bind.Both.CrewCheck then
                     if MrChosenOne.DataFolder.Information:FindFirstChild("Crew").Value == game.Players.LocalPlayer.DataFolder.Information:FindFirstChild("Crew").Value then
                         CamKeybind = false
-                        if VIN9.Both.Notifications then
+                        if Bind.Both.Notifications then
                             Notify("No Longer Attached")
                         end
                     end
                 end
-                if VIN9.Both.FriendCheck then
+                if Bind.Both.FriendCheck then
                     if game.Players.LocalPlayer:IsFriendsWith(MrChosenOne.UserId) then
                         CamKeybind = false
-                        if VIN9.Both.Notifications then
+                        if Bind.Both.Notifications then
                             Notify("No Longer Attached")
                         end
                     end
                 end
-                if VIN9.Both.TeamCheck then
+                if Bind.Both.TeamCheck then
                     if MrChosenOne.Team == game.Players.LocalPlayer.Team then
                         CamKeybind = false
-                        if VIN9.Both.Notifications then
+                        if Bind.Both.Notifications then
                             Notify("No Longer Attached")
                         end
                     end
@@ -626,226 +835,36 @@ task.spawn(function()
     end
 end)
 
-    local function pointOnCircle(angle)
-        local x = VIN9.Target.StrafeRadius * math.cos(angle)
-        local z = VIN9.Target.StrafeRadius * math.sin(angle)
-        return Vector3.new(x, 0, z)
+for _, v in pairs(game.Players.LocalPlayer.Character:GetChildren()) do
+    if v:IsA("Script") and v.Name ~= "Health" and v.Name ~= "Sound" and v:FindFirstChild("LocalScript") then
+        v:Destroy()
     end
-
-
-    function FindClosestPlayer()
-        local localPlayer = game.Players.LocalPlayer
-        local shortestDistance = math.huge
-        local nearestPlayer = nil
-        local localMouse = Vector2.new(localPlayer:GetMouse().X, localPlayer:GetMouse().Y)
-        
-        for _, otherPlayer in pairs(game.Players:GetPlayers()) do
-            if otherPlayer ~= localPlayer and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local otherPlayerPosition = otherPlayer.Character.HumanoidRootPart.Position
-                local pos = game:GetService("Workspace").CurrentCamera:WorldToViewportPoint(otherPlayerPosition)
-                local distance = (Vector2.new(pos.X, pos.Y) - localMouse).Magnitude
-                if distance < shortestDistance then
-                    shortestDistance = distance
-                    nearestPlayer = otherPlayer
-                end
-            end
-        end
-        return nearestPlayer
-    end
-
-    Mouse.KeyDown:Connect(function(ChosenKey)
-        if ChosenKey == VIN9.Target.Keybind and VIN9.Target.Enabled then
-            if TargetKeybind == false then
-                TargetKeybind = true
-                hojixvChosenPlayer = FindClosestPlayer()
-                if VIN9.Target.Notify then
-                    Notify("Locked Onto "..hojixvChosenPlayer.DisplayName)
-                end
-            elseif TargetKeybind == true then
-                TargetKeybind = false
-                if VIN9.Target.Notify then
-                    Notify("No Longer Locked On")
-                end
-            end
-        end
-    end)
-
-    game:GetService("RunService").Heartbeat:Connect(function()
-        if TargetKeybind and VIN9.Target.TargetStrafe and hojixvChosenPlayer then
-            if hojixvChosenPlayer.Character.BodyEffects["K.O"].Value ~= true then
-                local circlePosition = hojixvChosenPlayer.Character.HumanoidRootPart.Position + pointOnCircle(angle) + Vector3.new(0, VIN9.Target.StrafeHeight, 0)
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(circlePosition)
-                angle = angle + math.rad(VIN9.Target.StrafeSpeed)
-            end
-        end
-    end)
-
-    for _, v in pairs(game.Players.LocalPlayer.Character:GetChildren()) do
-            if v:IsA("Script") and v.Name ~= "Health" and v.Name ~= "Sound" and v:FindFirstChild("LocalScript") then
-                v:Destroy()
-            end
-        end
-        game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
-            repeat
-                wait()
-            until game.Players.LocalPlayer.Character
-            char.ChildAdded:Connect(function(child)
-                if child:IsA("Script") then 
-                    wait(0.1)
-                    if child:FindFirstChild("LocalScript") then
-                        child.LocalScript:FireServer()
-                    end
-                end
-            end)
-        end)
-
-    game:GetService("RunService").Heartbeat:Connect(
-        function()
-            if cframespeedtoggle == true then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame =
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame +
-                    game.Players.LocalPlayer.Character.Humanoid.MoveDirection * speedvalue / 2.5
-            end
-        end)
-    
-    game:GetService("RunService").Heartbeat:Connect(function()
-        if TargetKeybind and VIN9.Target.LookAt and hojixvChosenPlayer then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.Position, 
-                Vector3.new(
-                    hojixvChosenPlayer.Character.HumanoidRootPart.CFrame.X,
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.Position.Y,
-                    hojixvChosenPlayer.Character.HumanoidRootPart.CFrame.Z
-                )
-            )
-            game.Players.LocalPlayer.Character.Humanoid.AutoRotate = false
-        else
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-            game.Players.LocalPlayer.Character.Humanoid.AutoRotate = true
-        end
-
-        if TargetKeybind and VIN9.Target.Spectate and hojixvChosenPlayer then
-            game:GetService("Workspace").CurrentCamera.CameraSubject = hojixvChosenPlayer.Character.Humanoid
-        else
-            game:GetService("Workspace").CurrentCamera.CameraSubject = game.Players.LocalPlayer.Character.Humanoid
-        end
-    end)
-
-    game:GetService("RunService").Heartbeat:Connect(function()
-        if VIN9.Target.Drawings.Tracer then
-            if TargetKeybind and hojixvChosenPlayer then
-                local Vector = game:GetService("Workspace").CurrentCamera:WorldToViewportPoint(hojixvChosenPlayer.Character[VIN9.Target.Part].Position +
-                (hojixvChosenPlayer.Character[VIN9.Target.Part].Velocity * VIN9.Target.Prediction))
-
-                Tracer.Color = VIN9.Target.Drawings.Color
-                Tracer.Transparency = VIN9.Target.Drawings.Transparency
-                Tracer.Thickness = VIN9.Target.Drawings.Thickness
-                Tracer.From = Vector2.new(Mouse.X, Mouse.Y +35)
-                Tracer.To = Vector2.new(Vector.X, Vector.Y)
-                Tracer.Visible = true
-                else
-                    Tracer.Visible = false
-            end
-        end
-    end)
-
-
-
-    local hojixz = getrawmetatable(game)
-    local char = hojixz.__namecall
-    setreadonly(hojixz, false)
-    hojixz.__namecall = newcclosure(function(...)
-        local args = {...}
-        if TargetKeybind and getnamecallmethod() == "FireServer" and args[2] == "UpdateMousePos" then
-
-            if VIN9.Target.Resolver then
-                args[3] = hojixvChosenPlayer.Character[VIN9.Target.Part].Position + (hojixvChosenPlayer.Character.Humanoid.MoveDirection * VIN9.Target.ResolverTune)
-            else
-                args[3] = hojixvChosenPlayer.Character[VIN9.Target.Part].Position +
-                (hojixvChosenPlayer.Character[VIN9.Target.Part].Velocity * VIN9.Target.Prediction)
-            end
-            return char(unpack(args))
-        end
-        return char(...)
-    end)
-
-
-
-local OldIndex = nil
-OldIndex = hookmetamethod(game, "__index", function(self, Index)
-    if not checkcaller() and Mouse and self == Mouse and Index == "Hit" and VIN9.Silent.Enabled  then
-        local hojixvz = hojixv() 
-        if hojixvz and hojixvz[VIN9.Silent.Part] then
-            local Formula = nil
-            local Position = nil
-            local Velocity = hojixvz.HumanoidRootPart.AssemblyLinearVelocity
-            local Mov = hojixvz.Humanoid.MoveDirection
-            Position = hojixvz[VIN9.Silent.Part].CFrame
-            
-            local DETECTED = false
-            if VIN9.Silent.Resolver then
-                local Magnitude = Velocity.magnitude
-                local Magnitude2 = Mov.magnitude
-                if Magnitude > 84 then
-                    DETECTED = true
-                elseif Magnitude < 1 and Magnitude2 > 0.01 then
-                    DETECTED = true
-                elseif Magnitude > 5 and Magnitude2 < 0.01 then
-                    DETECTED = true
-                end
-            end
-
-            if Position then
-                if DETECTED then
-                    local MoveDirection = Mov * 16
-                    Formula = Position + (MoveDirection * VIN9.Silent.ResolverTune)
-                else
-                    Formula = Position + (Vector3.new(Velocity.X, (Velocity.Y * 0.5), Velocity.Z) * VIN9.Silent.Prediction)
-                end
-            end
-
-            if Formula then
-                return Index == "Hit" and Formula or OldIndex(self, Index)
-            end
-        end
-    end
-    return OldIndex(self, Index)
-end)
-
-
-
-if VIN9.Silent.UseAirPart == true then
-    hojixvz.Character:WaitForChild("Humanoid").StateChanged:Connect(function(RisingState,FallingState)
-        if FallingState == Enum.HumanoidStateType.Freefall then
-            VIN9.Silent.Part = VIN9.Silent.AirPart
-        else
-            VIN9.Silent.Part = VIN9.Silent.Part
-        end
-    end)
 end
-
-task.spawn(function()
-    if VIN9.Silent.AntiGroundShots and hojixvz[VIN9.Silent.Part].Velocity.Y < VIN9.Silent.AntiGroundActivation then
-        pcall(function()
-            local Target = hojixvz[VIN9.Silent.Part]
-            Target.Velocity = Vector3.new(Target.Velocity.X, (Target.Velocity.Y / VIN9.Silent.AntiGroundValue), Target.Velocity.Z)
-            Target.AssemblyLinearVelocity = Vector3.new(Target.Velocity.X, (Target.Velocity.Y / VIN9.Silent.AntiGroundValue), Target.Velocity.Z)
-        end)
-    end
+game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
+    repeat
+        wait()
+    until game.Players.LocalPlayer.Character
+    char.ChildAdded:Connect(function(child)
+        if child:IsA("Script") then 
+            wait(0.1)
+            if child:FindFirstChild("LocalScript") then
+                child.LocalScript:FireServer()
+            end
+        end
+    end)
 end)
 
---// Not Mine, I think lunars? Public bypass so okay
 for _, con in next, getconnections(workspace.CurrentCamera.Changed) do
     task.wait()
-      con:Disable()
-  end
-  for _, con in next, getconnections(workspace.CurrentCamera:GetPropertyChangedSignal("CFrame")) do
-     task.wait()
-      con:Disable()
-  end
-  
-  for _, key in next, getgc(true) do 
-    local function updateKey(instanceType)
+    con:Disable()
+end
+for _, con in next, getconnections(workspace.CurrentCamera:GetPropertyChangedSignal("CFrame")) do
+    task.wait()
+    con:Disable()
+end
+
+for _, key in next, getgc(true) do 
+    local function changeKey(instanceType)
         if pcall(function() return rawget(key, instanceType) end) and typeof(rawget(key, instanceType)) == 'table' and (rawget(key, instanceType))[1] == 'kick' then
             key.tvk = {
                 'kick',
@@ -855,7 +874,6 @@ for _, con in next, getconnections(workspace.CurrentCamera.Changed) do
             }
         end
     end
-
-    updateKey('indexInstance')
-    updateKey('namecallInstance')
+    changeKey('indexInstance')
+    changeKey('namecallInstance')
 end
